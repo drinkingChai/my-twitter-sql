@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+Users
+
+{% for user in allUsers %}
+  <li>{{ user.first_name }} {{ user.last_name }}</li>
+  <form class="" action="/users/{{user.id}}?_method=DELETE" method="POST">
+    <input type="submit" name="" value="Delete">
+  </form>
+{% endfor %}
+
+{% endblock %}

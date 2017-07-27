@@ -1,7 +1,45 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+const nunjucks = require('nunjucks');
 const db = require('./db');
+const routes = require('./routes');
+
 
 const app = express();
+
+app.set('view engine', 'html');
+app.engine('html', nunjucks.render);
+nunjucks.configure('views', {
+  express: app,
+  noCache: true
+})
+
+app.use(methodOverride('_method'));
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: false }));
+
+
+
+app.get('/', function(req, res) {
+  res.redirect('tweets');
+})
+
+app.get('/seed', function(req, res) {
+  db.sync(function(err) {
+    if (err) return console.log(err);
+    db.seed(function(err) {
+      if (err) return console.log(err);
+      res.redirect('/');
+    })
+  })
+})
+
+app.use('/users', routes.users);
+app.use('/tweets', routes.tweets);
+
+
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, function() {
@@ -12,11 +50,11 @@ app.listen(port, function() {
     if (err) return console.log(err);
     db.seed(function(err) {
       if (err) return console.log(err);
-      db.getAllUsers(function(err, users) {
+      db.getUsers({}, function(err, users) {
         if (err) return console.log(err);
         console.log(users);
       })
-      db.getAllTweets(function(err, tweets) {
+      db.getTweets({}, function(err, tweets) {
         if (err) return console.log(err);
         console.log(tweets);
       })

@@ -1,4 +1,5 @@
 const pg = require('pg');
+const _ = require('lodash');
 
 const client = new pg.Client(process.env.DATABASE_URL);
 
@@ -62,24 +63,17 @@ function deleteTweet(id, cb) {
 
 
 // get
-function getAllUsers(cb) {
+function getUsers(query, cb) {
   client.query("SELECT * FROM users", function(err, result) {
     if (err) return cb(err);
-    cb(null, result.rows);
+    cb(null, _.filter(result.rows, query));
   })
 }
 
-function getAllTweets(cb) {
-  client.query("SELECT * FROM tweets", function(err, result) {
+function getTweets(query, cb) {
+  client.query("SELECT * from users JOIN tweets ON users.id=user_id", function(err, result) {
     if (err) return cb(err);
-    cb(null, result.rows);
-  })
-}
-
-function getUserTweets(user_id, cb) {
-  client.query("SELECT * FROM tweets WHERE user_id = $1", [user_id], function(err, result) {
-    if (err) return cb(err);
-    cb(result);
+    cb(null, _.filter(result.rows, query));
   })
 }
 
@@ -137,6 +131,10 @@ client.connect();
 module.exports = {
   sync,
   seed,
-  getAllUsers,
-  getAllTweets
+  getUsers,
+  getTweets,
+  createUser,
+  deleteUser,
+  createTweet,
+  deleteTweet
 }
